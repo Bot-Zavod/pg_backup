@@ -13,7 +13,7 @@ It can:
 - delete old backups
 
 ## Configuration
-
+* `cd pg_backup`
 * Create copy of configuretion file to keep example clean for git
 	* `cp pg_backup.config pg_backup.local.config`
 	* Fill in necessary fields. In case you want to use telegram for logs and saving backup files, write chat id and bot token, because script is not validating this fields.
