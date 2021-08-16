@@ -1,0 +1,9 @@
+##### CUSTOM #####
+*.sqlite
+*.sql
+
+.vscode/
+
+pg_backup.local.config
+pg_backup.log
+backups/*
