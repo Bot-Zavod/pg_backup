@@ -89,7 +89,7 @@ function perform_backups()
 	###### FULL BACKUPS #######
 	###########################
 
-	echo -e "\n\nPerforming full backups on $DATABASE_PROD database"
+	echo -e "\n\nPerforming full backup on $DATABASE_PROD database"
 	echo -e "--------------------------------------------\n"
 
 	if ! pg_dump -b -Fc -h "$DB_HOSTNAME" -U "$DB_USERNAME" -d "$DATABASE_PROD" -f $FINAL_BACKUP_DIR"$DATABASE_PROD".custom.in_progress; then
@@ -111,10 +111,26 @@ function perform_backups()
 	###########################
 
 	if [ "$RESTORE_DEV" = "yes" ]; then
-		echo -e "\n\nPerforming restore backup $DATABASE_PROD on database $DATABASE_DEV"
+		echo -e "\n\nPerforming pg_restore $DATABASE_PROD backup on $DATABASE_DEV database"
 		echo -e "--------------------------------------------\n"
 		if ! pg_restore --clean --no-privileges --no-owner -h "$DB_HOSTNAME" -U "$DB_USERNAME" -d "$DATABASE_DEV" < $FINAL_BACKUP_DIR"$DATABASE_PROD".custom; then
 			echo "[!!ERROR!!] Failed to restore custom database $DATABASE_PROD backup on $DATABASE_DEV" | log
+		else
+			if ! psql -U "$DB_USERNAME" -d "$DATABASE_DEV" -h "$DB_HOSTNAME" -c "GRANT ALL PRIVILEGES ON DATABASE $DATABASE_DEV TO $DB_USERNAME_DEV" ; then
+				echo "[!!ERROR!!] Failed to GRANT ALL PRIVILEGES ON DATABASE $DATABASE_DEV TO $DB_USERNAME_DEV" | log
+			fi
+
+			if ! psql -U "$DB_USERNAME" -d "$DATABASE_DEV" -h "$DB_HOSTNAME" -c "GRANT ALL PRIVILEGES ON DATABASE $DATABASE_DEV TO $DB_USERNAME_DEV" ; then
+				echo "[!!ERROR!!] Failed to GRANT ALL PRIVILEGES ON DATABASE $DATABASE_DEV TO $DB_USERNAME_DEV" | log
+			fi
+
+			if ! psql -U "$DB_USERNAME" -d "$DATABASE_DEV" -h "$DB_HOSTNAME" -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO $DB_USERNAME_DEV" ; then
+				echo "[!!ERROR!!] Failed to ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO $DB_USERNAME_DEV" | log
+			fi
+
+			if ! psql -U "$DB_USERNAME" -d "$DATABASE_DEV" -h "$DB_HOSTNAME" -c "ALTER DEFAULT PRIVILEGES GRANT ALL ON TABLES TO $DB_USERNAME_DEV" ; then
+				echo "[!!ERROR!!] Failed to ALTER DEFAULT PRIVILEGES GRANT ALL ON TABLES TO $DB_USERNAME_DEV" | log
+			fi
 		fi
 	fi;
 
