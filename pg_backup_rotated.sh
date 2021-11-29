@@ -130,8 +130,12 @@ function perform_backups()
                 echo -e "[!!ERROR!!] Failed to GRANT ALL PRIVILEGES ON DATABASE $DATABASE_DEV TO $DB_USERNAME_DEV" | log
             fi
             
-            if ! psql -U "$DB_USERNAME" -d "$DATABASE_DEV" -h "$DB_HOSTNAME" -c "GRANT ALL PRIVILEGES ON DATABASE $DATABASE_DEV TO $DB_USERNAME_DEV" ; then
-                echo -e "[!!ERROR!!] Failed to GRANT ALL PRIVILEGES ON DATABASE $DATABASE_DEV TO $DB_USERNAME_DEV" | log
+            if ! psql -U "$DB_USERNAME" -d "$DATABASE_DEV" -h "$DB_HOSTNAME" -c "GRANT USAGE ON SCHEMA public TO $DB_USERNAME_DEV" ; then
+                echo -e "[!!ERROR!!] Failed to GRANT USAGE ON SCHEMA public TO $DB_USERNAME_DEV" | log
+            fi
+            
+            if ! psql -U "$DB_USERNAME" -d "$DATABASE_DEV" -h "$DB_HOSTNAME" -c "GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO $DB_USERNAME_DEV" ; then
+                echo -e "[!!ERROR!!] Failed to GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO $DB_USERNAME_DEV" | log
             fi
             
             if ! psql -U "$DB_USERNAME" -d "$DATABASE_DEV" -h "$DB_HOSTNAME" -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO $DB_USERNAME_DEV" ; then
