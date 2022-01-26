@@ -120,6 +120,11 @@ function perform_backups()
             echo -e "[!!ERROR!!] Failed to drop all tables in $DATABASE_DEV database" | log
         fi
         
+        # drop table for rozklad
+        if ! psql -U "$DB_USERNAME" -h "$DB_HOSTNAME" "$DATABASE_DEV" -t -c "DROP FUNCTION public.unstat();"; then
+            echo -e "[!!ERROR!!] Failed to drop public.unstat() in $DATABASE_DEV database" | log
+        fi
+        
         echo -e "\n\nPerforming pg_restore $DATABASE_PROD backup on $DATABASE_DEV database"
         echo -e "--------------------------------------------\n"
         
